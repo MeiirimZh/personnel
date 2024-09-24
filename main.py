@@ -1,6 +1,6 @@
 import sys
 import psycopg2
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
 from mainwindow import Ui_MainWindow
 from config import host, user, password, database
 
@@ -26,6 +26,22 @@ class Interface:
     def __init__(self):
         ui.addBtn.clicked.connect(lambda: self.add_employee())
 
+        self.output_employees()
+
+    def output_employees(self):
+        query = """SELECT first_name, surname, patronymic, subdivision, nationality, education, employee_position
+                FROM employees"""
+        database.cursor.execute(query)
+        data = database.cursor.fetchall()
+        self.populate_table(ui.personnelTable, data, 7)
+
+    @staticmethod
+    def populate_table(table, data, column_count):
+        table.setRowCount(len(data))
+        for row_index, row_data in enumerate(data):
+            for column_index in range(column_count):
+                table.setItem(row_index, column_index, QtWidgets.QTableWidgetItem(str(row_data[column_index])))
+
     @staticmethod
     def get_parameters():
         return (
@@ -41,9 +57,9 @@ class Interface:
     def add_employee(self):
         parameters = self.get_parameters()
         query = """INSERT INTO employees (first_name, surname, patronymic, subdivision, nationality, education, employee_position)
-                VALUES (%s, %s, %s, %s, %s, %s %s)"""
+                VALUES (%s, %s, %s, %s, %s, %s, %s)"""
         database.cursor.execute(query, parameters)
-
+        self.output_employees()
 
 interface = Interface()
 
