@@ -306,6 +306,14 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        self.personnelTable.setColumnWidth(0, 150)
+        self.personnelTable.setColumnWidth(1, 150)
+        self.personnelTable.setColumnWidth(2, 150)
+        self.personnelTable.setColumnWidth(3, 200)
+        self.personnelTable.setColumnWidth(4, 100)
+        self.personnelTable.setColumnWidth(5, 100)
+        self.personnelTable.setColumnWidth(6, 200)
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Personnel"))
