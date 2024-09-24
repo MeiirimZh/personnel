@@ -29,6 +29,7 @@ class Interface:
     def __init__(self):
         ui.addBtn.clicked.connect(lambda: self.add_employee())
         ui.deleteBtn.clicked.connect(lambda: self.delete_employee())
+        ui.editBtn.clicked.connect(lambda: self.edit_employee())
 
         ui.personnelTable.verticalHeader().sectionClicked.connect(self.copy_employee)
 
@@ -72,7 +73,7 @@ class Interface:
     @staticmethod
     def copy_employee(row):
         items = [ui.personnelTable.item(row, col).text() for col in range(ui.personnelTable.columnCount())]
-        print(items)
+        database.copiedEmployee = tuple(items)
         text_fields = (ui.firstNameLE, ui.surnameLE, ui.patronymicLE, ui.subdivisionLE,
                        ui.nationalityLE, ui.educationLE, ui.positionLE)
         for i in range(len(text_fields)):
@@ -106,6 +107,15 @@ class Interface:
                     subdivision = %s AND nationality = %s AND education = %s AND employee_position = %s"""
             database.cursor.execute(query, parameters)
             self.output_employees()
+
+    def edit_employee(self):
+        query = """UPDATE employees
+                SET first_name = %s, surname = %s, patronymic = %s, 
+                subdivision = %s, nationality = %s, education = %s, employee_position = %s
+                WHERE first_name = %s AND surname = %s AND patronymic = %s AND 
+                subdivision = %s AND nationality = %s AND education = %s AND employee_position = %s"""
+        database.cursor.execute(query, self.get_parameters() + database.copiedEmployee)
+        self.output_employees()
 
 interface = Interface()
 
