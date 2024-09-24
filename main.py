@@ -1,6 +1,7 @@
 import sys
 import psycopg2
 from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QMessageBox
 from mainwindow import Ui_MainWindow
 from config import host, user, password, database
 
@@ -12,6 +13,8 @@ MainWindow.show()
 
 class Database:
     def __init__(self, connection):
+        self.copiedEmployee = []
+
         self.connection = connection
         self.cursor = self.connection.cursor()
         self.connection.autocommit = True
@@ -25,8 +28,32 @@ database = Database(psycopg2.connect(host=host, user=user, password=password, da
 class Interface:
     def __init__(self):
         ui.addBtn.clicked.connect(lambda: self.add_employee())
+        ui.deleteBtn.clicked.connect(lambda: self.delete_employee())
+
+        ui.personnelTable.verticalHeader().sectionClicked.connect(self.copy_employee)
 
         self.output_employees()
+        self.update_records_number()
+
+    @staticmethod
+    def show_message(message):
+        msgbox = QMessageBox()
+        msgbox.setWindowTitle('Information')
+        msgbox.setText(message)
+        msgbox.setIcon(QMessageBox.Information)
+        msgbox.setStandardButtons(QMessageBox.Ok|QMessageBox.Cancel)
+
+        action = msgbox.exec_()
+
+        if action == QMessageBox.Ok:
+            return True
+
+    @staticmethod
+    def update_records_number():
+        query = "SELECT * FROM employees"
+        database.cursor.execute(query)
+        data = database.cursor.fetchall()
+        ui.recordsLabel.setText(f'Total records: {len(data)}')
 
     def output_employees(self):
         query = """SELECT first_name, surname, patronymic, subdivision, nationality, education, employee_position
@@ -41,6 +68,15 @@ class Interface:
         for row_index, row_data in enumerate(data):
             for column_index in range(column_count):
                 table.setItem(row_index, column_index, QtWidgets.QTableWidgetItem(str(row_data[column_index])))
+
+    @staticmethod
+    def copy_employee(row):
+        items = [ui.personnelTable.item(row, col).text() for col in range(ui.personnelTable.columnCount())]
+        print(items)
+        text_fields = (ui.firstNameLE, ui.surnameLE, ui.patronymicLE, ui.subdivisionLE,
+                       ui.nationalityLE, ui.educationLE, ui.positionLE)
+        for i in range(len(text_fields)):
+            text_fields[i].setText(items[i])
 
     @staticmethod
     def get_parameters():
@@ -60,6 +96,16 @@ class Interface:
                 VALUES (%s, %s, %s, %s, %s, %s, %s)"""
         database.cursor.execute(query, parameters)
         self.output_employees()
+
+    def delete_employee(self):
+        res = self.show_message('Are you sure?')
+        if res:
+            parameters = self.get_parameters()
+            query = """DELETE FROM employees
+                    WHERE first_name = %s AND surname = %s AND patronymic = %s AND 
+                    subdivision = %s AND nationality = %s AND education = %s AND employee_position = %s"""
+            database.cursor.execute(query, parameters)
+            self.output_employees()
 
 interface = Interface()
 

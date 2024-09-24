@@ -334,7 +334,7 @@ class Ui_MainWindow(object):
         self.sortParamCB.setItemText(6, _translate("MainWindow", "Employee position"))
         self.sortOrderCB.setItemText(0, _translate("MainWindow", "Ascending"))
         self.sortOrderCB.setItemText(1, _translate("MainWindow", "Descending"))
-        self.sortBtn.setText(_translate("MainWindow", "SORT"))
+        self.sortBtn.setText(_translate("MainWindow", "Sort"))
         self.sortResetBtn.setText(_translate("MainWindow", "Reset"))
         self.recordsLabel.setText(_translate("MainWindow", "Total records"))
         item = self.personnelTable.horizontalHeaderItem(0)
