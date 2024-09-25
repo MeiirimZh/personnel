@@ -27,14 +27,24 @@ class Database:
         if not filter:
             query = """SELECT first_name, surname, patronymic, subdivision, nationality, education, employee_position  
                     FROM employees"""
-            self.cursor.execute(query)
-            return self.cursor.fetchall()
         else:
             query = """SELECT first_name, surname, patronymic, subdivision, nationality, education, employee_position
                     FROM employees
                     WHERE {}""".format(filter)
-            self.cursor.execute(query)
-            return self.cursor.fetchall()
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
+
+    def show_sorted_employees(self, filter, order):
+        if order == "Ascending":
+            query = """SELECT first_name, surname, patronymic, subdivision, nationality, education, employee_position
+                    FROM employees
+                    ORDER BY {}""".format(filter)
+        else:
+            query = """SELECT first_name, surname, patronymic, subdivision, nationality, education, employee_position
+                    FROM employees
+                    ORDER BY {} DESC""".format(filter)
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
 
     def add_employee(self, parameters):
         query = """INSERT INTO employees (first_name, surname, patronymic, subdivision, nationality, education, employee_position)
@@ -66,6 +76,9 @@ class Interface:
 
         ui.searchBtn.clicked.connect(lambda: self.search_gui())
 
+        ui.sortBtn.clicked.connect(lambda: self.sort_gui())
+        ui.sortResetBtn.clicked.connect(lambda: self.output_employees())
+
         ui.personnelTable.verticalHeader().sectionClicked.connect(self.copy_employee)
 
         self.output_employees()
@@ -91,6 +104,10 @@ class Interface:
 
     def output_employees(self, filter=""):
         data = database.show_employees(filter)
+        self.populate_table(ui.personnelTable, data, 7)
+
+    def output_sorted_employees(self, filter, order):
+        data = database.show_sorted_employees(filter, order)
         self.populate_table(ui.personnelTable, data, 7)
 
     @staticmethod
@@ -144,6 +161,9 @@ class Interface:
             self.output_employees(filter)
         else:
             self.output_employees()
+
+    def sort_gui(self):
+        self.output_sorted_employees(ui.sortParamCB.currentText().lower().replace(' ', '_'), ui.sortOrderCB.currentText())
 
 interface = Interface()
 
