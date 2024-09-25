@@ -23,13 +23,48 @@ class Database:
         self.connection.close()
         self.cursor.close()
 
+    def show_employees(self, filter = ""):
+        if not filter:
+            query = """SELECT first_name, surname, patronymic, subdivision, nationality, education, employee_position  
+                    FROM employees"""
+            self.cursor.execute(query)
+            return self.cursor.fetchall()
+        else:
+            query = """SELECT first_name, surname, patronymic, subdivision, nationality, education, employee_position
+                    FROM employees
+                    WHERE {}""".format(filter)
+            self.cursor.execute(query)
+            return self.cursor.fetchall()
+
+    def add_employee(self, parameters):
+        query = """INSERT INTO employees (first_name, surname, patronymic, subdivision, nationality, education, employee_position)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+        self.cursor.execute(query, parameters)
+
+    def delete_employee(self, parameters):
+        query = """DELETE FROM employees
+                WHERE first_name = %s AND surname = %s AND patronymic = %s AND 
+                subdivision = %s AND nationality = %s AND education = %s AND employee_position = %s"""
+        self.cursor.execute(query, parameters)
+
+    def edit_employee(self, parameters):
+        query = """UPDATE employees
+                SET first_name = %s, surname = %s, patronymic = %s, 
+                subdivision = %s, nationality = %s, education = %s, employee_position = %s
+                WHERE first_name = %s AND surname = %s AND patronymic = %s AND 
+                subdivision = %s AND nationality = %s AND education = %s AND employee_position = %s"""
+        self.cursor.execute(query, parameters)
+
+
 database = Database(psycopg2.connect(host=host, user=user, password=password, database=database))
 
 class Interface:
     def __init__(self):
-        ui.addBtn.clicked.connect(lambda: self.add_employee())
-        ui.deleteBtn.clicked.connect(lambda: self.delete_employee())
-        ui.editBtn.clicked.connect(lambda: self.edit_employee())
+        ui.addBtn.clicked.connect(lambda: self.add_employee_gui())
+        ui.deleteBtn.clicked.connect(lambda: self.delete_employee_gui())
+        ui.editBtn.clicked.connect(lambda: self.edit_employee_gui())
+
+        ui.searchBtn.clicked.connect(lambda: self.search_gui())
 
         ui.personnelTable.verticalHeader().sectionClicked.connect(self.copy_employee)
 
@@ -42,7 +77,7 @@ class Interface:
         msgbox.setWindowTitle('Information')
         msgbox.setText(message)
         msgbox.setIcon(QMessageBox.Information)
-        msgbox.setStandardButtons(QMessageBox.Ok|QMessageBox.Cancel)
+        msgbox.setStandardButtons(QMessageBox.Ok|QMessageBox.Close)
 
         action = msgbox.exec_()
 
@@ -51,16 +86,11 @@ class Interface:
 
     @staticmethod
     def update_records_number():
-        query = "SELECT * FROM employees"
-        database.cursor.execute(query)
-        data = database.cursor.fetchall()
+        data = database.show_employees()
         ui.recordsLabel.setText(f'Total records: {len(data)}')
 
-    def output_employees(self):
-        query = """SELECT first_name, surname, patronymic, subdivision, nationality, education, employee_position
-                FROM employees"""
-        database.cursor.execute(query)
-        data = database.cursor.fetchall()
+    def output_employees(self, filter=""):
+        data = database.show_employees(filter)
         self.populate_table(ui.personnelTable, data, 7)
 
     @staticmethod
@@ -91,31 +121,29 @@ class Interface:
             ui.positionLE.text()
         )
 
-    def add_employee(self):
-        parameters = self.get_parameters()
-        query = """INSERT INTO employees (first_name, surname, patronymic, subdivision, nationality, education, employee_position)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-        database.cursor.execute(query, parameters)
-        self.output_employees()
+    def add_employee_gui(self):
+        if "" not in self.get_parameters():
+            database.add_employee(self.get_parameters())
+            self.output_employees()
+        else:
+            self.show_message("Values in an employee parameters entries must not be empty!")
 
-    def delete_employee(self):
+    def delete_employee_gui(self):
         res = self.show_message('Are you sure?')
         if res:
-            parameters = self.get_parameters()
-            query = """DELETE FROM employees
-                    WHERE first_name = %s AND surname = %s AND patronymic = %s AND 
-                    subdivision = %s AND nationality = %s AND education = %s AND employee_position = %s"""
-            database.cursor.execute(query, parameters)
+            database.delete_employee(self.get_parameters())
             self.output_employees()
 
-    def edit_employee(self):
-        query = """UPDATE employees
-                SET first_name = %s, surname = %s, patronymic = %s, 
-                subdivision = %s, nationality = %s, education = %s, employee_position = %s
-                WHERE first_name = %s AND surname = %s AND patronymic = %s AND 
-                subdivision = %s AND nationality = %s AND education = %s AND employee_position = %s"""
-        database.cursor.execute(query, self.get_parameters() + database.copiedEmployee)
+    def edit_employee_gui(self):
+        database.edit_employee(self.get_parameters() + database.copiedEmployee)
         self.output_employees()
+
+    def search_gui(self):
+        if ui.searchLE.text():
+            filter = f"{ui.searchCB.currentText().lower().replace(' ', '_')}='{ui.searchLE.text()}'"
+            self.output_employees(filter)
+        else:
+            self.output_employees()
 
 interface = Interface()
 

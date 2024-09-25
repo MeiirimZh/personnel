@@ -314,6 +314,15 @@ class Ui_MainWindow(object):
         self.personnelTable.setColumnWidth(5, 100)
         self.personnelTable.setColumnWidth(6, 200)
 
+        self.searchLE.setPlaceholderText("Enter...")
+        self.firstNameLE.setPlaceholderText("Enter...")
+        self.surnameLE.setPlaceholderText("Enter...")
+        self.patronymicLE.setPlaceholderText("Enter...")
+        self.subdivisionLE.setPlaceholderText("Enter...")
+        self.nationalityLE.setPlaceholderText("Enter...")
+        self.educationLE.setPlaceholderText("Enter...")
+        self.positionLE.setPlaceholderText("Enter...")
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Personnel"))
