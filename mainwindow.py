@@ -295,11 +295,8 @@ class Ui_MainWindow(object):
         self.actionSave.setObjectName("actionSave")
         self.actionAuthor = QtWidgets.QAction(MainWindow)
         self.actionAuthor.setObjectName("actionAuthor")
-        self.actionHow_to_use = QtWidgets.QAction(MainWindow)
-        self.actionHow_to_use.setObjectName("actionHow_to_use")
         self.menuFile.addAction(self.actionSave)
         self.menuAbout.addAction(self.actionAuthor)
-        self.menuAbout.addAction(self.actionHow_to_use)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuAbout.menuAction())
 
@@ -374,4 +371,3 @@ class Ui_MainWindow(object):
         self.menuAbout.setTitle(_translate("MainWindow", "About"))
         self.actionSave.setText(_translate("MainWindow", "Save"))
         self.actionAuthor.setText(_translate("MainWindow", "Author"))
-        self.actionHow_to_use.setText(_translate("MainWindow", "How to use"))

@@ -22,8 +22,8 @@ class Database:
         self.connection.autocommit = True
 
     def __del__(self):
-        self.connection.close()
         self.cursor.close()
+        self.connection.close()
 
     def show_employees(self, filter = ""):
         if not filter:
@@ -102,7 +102,7 @@ class Interface:
         ui.sortResetBtn.clicked.connect(lambda: self.output_employees())
 
         ui.actionSave.triggered.connect(lambda: database.save_to_file())
-        ui.actionAuthor.triggered.connect(lambda: self.show_message("Meiirim Zhanzhumanov 2024"))
+        ui.actionAuthor.triggered.connect(lambda: self.show_message("Zhanzhumanov Meiirim Amanbaevich 2024"))
 
         ui.personnelTable.verticalHeader().sectionClicked.connect(self.copy_employee)
 
