@@ -84,6 +84,7 @@ class Database:
         with open('data.json', 'w') as file:
             json.dump(self.employeeInfo, file, indent=2)
 
+        self.employeeInfo = {'employees': []}
         interface.show_message('The data has been saved to a file!')
 
 
@@ -166,6 +167,7 @@ class Interface:
         if "" not in self.get_parameters():
             database.add_employee(self.get_parameters())
             self.output_employees()
+            self.update_records_number()
         else:
             self.show_message("Values in an employee parameters entries must not be empty!")
 
@@ -174,6 +176,7 @@ class Interface:
         if res:
             database.delete_employee(self.get_parameters())
             self.output_employees()
+            self.update_records_number()
 
     def edit_employee_gui(self):
         database.edit_employee(self.get_parameters() + database.copiedEmployee)
