@@ -1,5 +1,6 @@
 import sys
 import psycopg2
+import json
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 from mainwindow import Ui_MainWindow
@@ -14,6 +15,7 @@ MainWindow.show()
 class Database:
     def __init__(self, connection):
         self.copiedEmployee = []
+        self.employeeInfo = {'employees': []}
 
         self.connection = connection
         self.cursor = self.connection.cursor()
@@ -65,6 +67,25 @@ class Database:
                 subdivision = %s AND nationality = %s AND education = %s AND employee_position = %s"""
         self.cursor.execute(query, parameters)
 
+    def save_to_file(self):
+        columns = ('First name', 'Surname', 'Patronymic', 'Subdivision',
+                   'Nationality', 'Education', 'Employee position')
+
+        query = """SELECT first_name, surname, patronymic, subdivision, nationality, education, employee_position
+                FROM employees"""
+        self.cursor.execute(query)
+        data = self.cursor.fetchall()
+
+        for employee in data:
+            self.employeeInfo['employees'].append({})
+            for i in range(7):
+                self.employeeInfo['employees'][-1][columns[i]] = employee[i]
+
+        with open('data.json', 'w') as file:
+            json.dump(self.employeeInfo, file, indent=2)
+
+        interface.show_message('The data has been saved to a file!')
+
 
 database = Database(psycopg2.connect(host=host, user=user, password=password, database=database))
 
@@ -78,6 +99,9 @@ class Interface:
 
         ui.sortBtn.clicked.connect(lambda: self.sort_gui())
         ui.sortResetBtn.clicked.connect(lambda: self.output_employees())
+
+        ui.actionSave.triggered.connect(lambda: database.save_to_file())
+        ui.actionAuthor.triggered.connect(lambda: self.show_message("Meiirim Zhanzhumanov 2024"))
 
         ui.personnelTable.verticalHeader().sectionClicked.connect(self.copy_employee)
 
